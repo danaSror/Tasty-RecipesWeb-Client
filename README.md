@@ -1,8 +1,7 @@
 
-# Presenters: 
+# Tasty
 
-Yarin Hayun - 311326359 - yarinbo@post.bgu.ac.il <br>
-Dana Sror - 204591424 - danayevd@post.bgu.ac.il
+The recipes web for you
 ____________________________________________
 
 
@@ -43,7 +42,9 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
-
+---
+<img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388480/Screenshot_9_x3qjax.jpg" height="50%"  />
+---
 
 
 
