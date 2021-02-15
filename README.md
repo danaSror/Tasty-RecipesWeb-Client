@@ -43,7 +43,7 @@ The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
 ---
-<img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388480/Screenshot_9_x3qjax.jpg" height=50% width=50%  />
+<img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388480/Screenshot_9_x3qjax.jpg"   />
 
 
 
