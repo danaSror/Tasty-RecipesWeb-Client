@@ -1,0 +1,647 @@
+openapi: 3.0.0
+info:
+  title: Assigment3.3
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/danaSror/Assigment3.1/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: https://virtserver.swaggerhub.com/danaSror/Assigment3.3/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:3000
+tags:
+- name: auth
+  description: All authentication related routes
+- name: user
+  description: All the user's personal app info
+- name: recipes
+  description: All reciepes general info
+paths:
+  /Login:
+    post:
+      tags:
+      - auth
+      description: A JSON object containing the username and password.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body'
+        required: true
+      responses:
+        "200":
+          description: |
+            User authenitcated successfully. The session ID is returned in a cookie named `session`.  You need to include this cookie in subsequent requests
+          headers:
+            Set-Cookie:
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: session=87s97sdhgf279293f8w0e9
+        "401":
+          description: Authentication failed
+  /Register:
+    post:
+      tags:
+      - auth
+      description: A JSON object containing all the details about the user .
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/body_1'
+        required: true
+      responses:
+        "200":
+          description: |
+            User registration successfully.
+          headers:
+            Set-Cookie:
+              style: simple
+              explode: false
+              schema:
+                type: string
+                example: session=87s97sdhgf279293f8w0e9
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: user created
+                  success: "true"
+        "500":
+          description: Registration failed
+  /Logout:
+    post:
+      tags:
+      - auth
+      description: Log out and delete session
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Succesfully logs out
+                  success: "true"
+      security:
+      - cookieAuth: []
+  /recipes/search/query/{searchQuery}/amount/{num}:
+    get:
+      tags:
+      - recipes
+      description: Serach for a reciepie in the spoonacular API, using a search query.
+        Will return resuslts according to number param.  Can filter resutld by Cusine,
+        diet, intolerance.
+      parameters:
+      - name: searchQuery
+        in: path
+        description: The search query for searching a query in the API
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: num
+        in: path
+        description: Number of search resultls to retrieve
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          default: 5
+          enum:
+          - 5
+          - 10
+          - 15
+      - name: cuisine
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Cuisine'
+      - name: diet
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Diet'
+      - name: intolerances
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/Intolerances'
+      responses:
+        "200":
+          description: Successful retrieved search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+        "204":
+          description: No reciepes found for the search params
+  /recipes/getRecipeInformation/{recipeID}:
+    get:
+      tags:
+      - recipes
+      description: Get full inforamtion on recipe by id from DB
+      parameters:
+      - name: recipeID
+        in: path
+        description: Recipe id, for returning user data
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 933546
+      responses:
+        "200":
+          description: success pull object with the info of the send id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeFullInfo'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+  /recipes/random:
+    get:
+      tags:
+      - recipes
+      description: get 3 random recipes
+      responses:
+        "200":
+          description: Succese pull 3 random recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+              example:
+                id: 715567
+                title: Beef Fajita Marinade
+                readyInMinutes: 45
+                aggregateLikes: 21
+                vegetarian: true
+                vegan: false
+                glutenFree: true
+                image: https://spoonacular.com/recipeImages/715567-556x370.jpg
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+  /user/recipesInfo/{ids}:
+    get:
+      tags:
+      - user
+      description: Get the user's app info on reciepes by their ids
+      parameters:
+      - name: ids
+        in: path
+        description: Reciped ids array, for returning user data
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: array
+          items:
+            type: integer
+      responses:
+        "200":
+          description: Object with the user info foreach of the sended ids
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  required:
+                  - saved
+                  - watched
+                  type: object
+                  properties:
+                    watched:
+                      type: boolean
+                    saved:
+                      type: boolean
+                description: User's info on reciepes. Returns a dictionary of ids
+                  as keys, and info as values
+                example:
+                  "23":
+                    watched: true
+                    saved: false
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/clicked/{recipeID}:
+    post:
+      tags:
+      - user
+      description: The user clicks on the recipe and therefore updates that he has
+        viewed the recipe
+      parameters:
+      - name: recipeID
+        in: path
+        description: recipe id, to add the recipe to the user's viewed recipes
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 641202
+      responses:
+        "200":
+          description: The recipe update as a viewer was successfully updated
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '{"message":"The recipe has been updated as viewed successfully"}'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/getFavorites:
+    get:
+      tags:
+      - user
+      description: Get the user's app info on his favorites reciepes
+      responses:
+        "200":
+          description: Object with the user info foreach of his favorites recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+              example:
+                id: 715567
+                title: Beef Fajita Marinade
+                readyInMinutes: 45
+                aggregateLikes: 21
+                vegetarian: true
+                vegan: false
+                glutenFree: true
+                image: https://spoonacular.com/recipeImages/715567-556x370.jpg
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/addFavorite/{recipeId}:
+    post:
+      tags:
+      - user
+      description: update the user`s favorite recipes
+      parameters:
+      - name: recipeId
+        in: path
+        description: recipe id, To add the recipe to the user's favorites
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          example: 641202
+      responses:
+        "200":
+          description: Recipe successfully added to user favorites
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '{"message":"Recipe added succefuly to favorite"}'
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/lastwatchedRecipes:
+    get:
+      tags:
+      - user
+      description: update the user`s favorite recipes
+      responses:
+        "200":
+          description: Object with info foreach of 3 last view recipes by the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+              example:
+                id: 715567
+                title: Beef Fajita Marinade
+                readyInMinutes: 45
+                aggregateLikes: 21
+                vegetarian: true
+                vegan: false
+                glutenFree: true
+                image: https://spoonacular.com/recipeImages/715567-556x370.jpg
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/familyRecipes:
+    get:
+      tags:
+      - user
+      description: Get the user's app info on his family reciepes
+      responses:
+        "200":
+          description: Object with the user info foreach of his family recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+              example:
+                id: 715567
+                title: Beef Fajita Marinade
+                readyInMinutes: 45
+                aggregateLikes: 21
+                vegetarian: true
+                vegan: false
+                glutenFree: true
+                image: https://spoonacular.com/recipeImages/715567-556x370.jpg
+                servings: 16
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+  /user/personalRecipes:
+    get:
+      tags:
+      - user
+      description: Get the user's app info on his personal reciepes
+      responses:
+        "200":
+          description: Object with the user info foreach of his personal recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReciepePreview'
+              example:
+                id: 715567
+                title: Beef Fajita Marinade
+                readyInMinutes: 45
+                aggregateLikes: 21
+                vegetarian: true
+                vegan: false
+                glutenFree: true
+                image: https://spoonacular.com/recipeImages/715567-556x370.jpg
+                servings: 16
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+      security:
+      - cookieAuth: []
+components:
+  schemas:
+    ReciepePreview:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The reciepe identifier, returned for further processing and
+            actions on reciepes
+          example: 12
+        title:
+          type: string
+          description: The recipe title
+          example: pizza
+        image:
+          type: string
+          description: The reciepe image url
+        duration:
+          type: integer
+          description: Reciepe ready duration in minutes
+          example: 45
+        aggregateLikes:
+          type: integer
+          example: 205
+        vegeterian:
+          type: boolean
+        vegan:
+          type: boolean
+        glutenFree:
+          type: boolean
+    RecipeFullInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The reciepe identifier, returned for further processing and
+            actions on reciepes
+          example: 12
+        title:
+          type: string
+          description: The recipe title
+          example: pizza
+        readyInMinutes:
+          type: integer
+          description: Reciepe ready duration in minutes
+          example: 45
+        aggregateLikes:
+          type: integer
+          example: 205
+        vegeterian:
+          type: boolean
+        vegan:
+          type: boolean
+        glutenFree:
+          type: boolean
+        image:
+          type: string
+          description: The reciepe image url
+        servings:
+          type: integer
+        instructions:
+          $ref: '#/components/schemas/Instructions'
+        ingredients:
+          $ref: '#/components/schemas/Ingredients'
+    Cuisine:
+      type: string
+      enum:
+      - African
+      - American
+      - British
+      - Cajun
+      - Caribbean
+      - Chinese
+      - Eastern European
+      - European
+      - French
+      - German
+      - Greek
+      - Indian
+      - Irish
+      - Italian
+      - Japanese
+      - Jewish
+      - Korean
+      - Latin American
+      - Mediterranean
+      - Mexican
+      - Middle Eastern
+      - Nordic
+      - Southern
+      - Spanish
+      - Thai
+      - Vietnamese
+    Diet:
+      type: string
+      enum:
+      - Gluten Free
+      - Ketogenic
+      - Vegetarian
+      - Lacto-Vegetarian
+      - Ovo-Vegetarian
+      - Vegan
+      - Pescetarian
+      - Paleo
+      - Primal
+      - Whole30
+    Intolerances:
+      type: string
+      enum:
+      - Dairy
+      - Egg
+      - Gluten
+      - Grain
+      - Peanut
+      - Seafood
+      - Sesame
+      - Shellfish
+      - Soy
+      - Sulfite
+      - Tree Nut
+      - Wheat
+    Instructions:
+      type: string
+      example: |-
+        Grease a 9" x 13" baking pan with 1 tbsp. butter and spread 12 cup of the marinara sauce across the bottom of the pan. Set aside. Bring a 6-qt. pot of salted water to a boil over high heat.
+        Add the manicotti and cook until just tender, about 8 minutes.
+        Drain manicotti and rinse under cold water; set aside.
+        Heat oven to 45
+        Heat remaining butter in a 12" skillet over medium heat.
+        Add garlic and cook, stirring occasionally, until soft, about 5 minutes.
+        Transfer garlic to a medium bowl along with the ricotta, 12 cup parmesan, 5 tbsp. chopped parsley, salt, pepper, nutmeg, and eggs and stir to combine.Spoon some of the filling into both openings of each manicotti shell. (Alternatively, transfer the ricotta mixture to a 1-gallon resealable plastic bag, snip off a bottom corner of the bag, and pipe filling into pasta.) Repeat with remaining manicotti shells.
+        Transfer stuffed manicotti to prepared baking dish, making 2 rows.
+        Spread the remaining marinara sauce over the manicotti and sprinkle with remaining parmesan.
+        Bake until hot and bubbly, about 20 minutes. Sprinkle with remaining parsley.
+        Let sit for 5 minutes before serving.
+    Ingredients:
+      type: array
+      example:
+      - 1 cup of chicken stock
+      - 1 tablespoon of corn starch
+      - 3  of dried bay leaves
+      - 2 tablespoons of fresh flat leaf parsley
+      - 2  of garlic cloves
+      - 2 cups of heavy cream
+      - 0.5 teaspoon of nutmeg
+      - 30 ounces of pearl onions
+      - 1 teaspoon of salt
+      - 0.125 teaspoon of white pepper
+      items:
+        type: string
+    Error500:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Server error
+    body:
+      type: object
+      properties:
+        username:
+          maxLength: 8
+          minLength: 3
+          type: string
+          description: Contain only letters
+        password:
+          maxLength: 10
+          minLength: 5
+          type: string
+          description: Contains letters with at least 1 numerical character and 1
+            special characters
+      example:
+        username: dana
+        password: abc123ABC
+    body_1:
+      type: object
+      properties:
+        username:
+          maxLength: 8
+          minLength: 3
+          pattern: ^[A-Za-z]+$
+          type: string
+          example: DanaSror123
+        firstname:
+          type: string
+          example: Dana
+        lastname:
+          type: string
+          example: Sror
+        country:
+          type: string
+          example: Israel
+        password:
+          maxLength: 10
+          minLength: 5
+          pattern: ^(?=.\d)(?=.?[#?!@$%^&*-]).{5,10}$
+          type: string
+          example: abcABC123
+        confirmation_password:
+          maxLength: 10
+          minLength: 5
+          pattern: ^(?=.\d)(?=.?[#?!@$%^&*-]).{5,10}$
+          type: string
+          example: abcABC123
+        email:
+          type: string
+          format: email
+          example: danayevd@post.bgu.ac.il
+        profileurl:
+          type: string
+          example: https://res.cloudinary.com/dfgjujaok/image/upload/v1589229/sampl.jpg
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: session
+      in: cookie
