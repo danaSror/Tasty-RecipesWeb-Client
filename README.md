@@ -2,6 +2,7 @@
 # Tasty
 
 The recipes web for you
+<img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388480/Screenshot_5_f1uxrb.jpg"   />
 ____________________________________________
 
 
@@ -48,7 +49,6 @@ Your app is ready to be deployed!
 
 <img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388479/Screenshot_8_ftzuk9.jpg"   />
 
-<img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388480/Screenshot_5_f1uxrb.jpg"   />
 
 <img src="https://res.cloudinary.com/dfgjujaok/image/upload/v1613388481/Screenshot_10_ya8t2s.jpg"   />
 
