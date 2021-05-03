@@ -16,8 +16,8 @@ ____________________________________________
 
 ##  Description
 
- This site consists client and server side. 
- The client can receive recipes randomaly, and look for specific recipes.
+ This site consists of client and server-side. 
+ The client can receive recipes randomly, and look for specific recipes.
 
 ---
 
